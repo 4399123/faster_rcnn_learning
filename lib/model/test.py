@@ -96,7 +96,7 @@ def _rescale_boxes(boxes, inds, scales):
 
 
 def im_detect(net, im):
-    blobs, im_scales = _get_blobs(im)   #¹¹½¨Í¼Ïñ½ð×ÖËþ
+    blobs, im_scales = _get_blobs(im)
     assert len(im_scales) == 1, "Only single-image batch implemented"
 
     im_blob = blobs['data']
