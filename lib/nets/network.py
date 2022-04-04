@@ -1,3 +1,4 @@
+# coding=gbk
 # --------------------------------------------------------
 # Tensorflow Faster R-CNN
 # Licensed under The MIT License [see LICENSE for details]
@@ -318,7 +319,7 @@ class Network(nn.Module):
         assert tag != None
 
         # Initialize layers
-        self._init_modules()
+        self._init_modules()   #初始化预训练模型参数，固定layer1中的参数，在训练过程中不更新
 
     def _init_modules(self):
         self._init_head_tail()
@@ -371,7 +372,7 @@ class Network(nn.Module):
     def _predict(self):
         # This is just _build_network in tf-faster-rcnn
         torch.backends.cudnn.benchmark = False
-        net_conv = self._image_to_head()
+        net_conv = self._image_to_head()    #backbone 特征提取
 
         # build the anchors for the image
         self._anchor_component(net_conv.size(2), net_conv.size(3))
@@ -398,7 +399,7 @@ class Network(nn.Module):
         self._image_gt_summaries['gt_boxes'] = gt_boxes
         self._image_gt_summaries['im_info'] = im_info
 
-        self._image = torch.from_numpy(image.transpose([0, 3, 1,
+        self._image = torch.from_numpy(image.transpose([0, 3, 1,                 #将array转化为tensor,同时将原本[N,H,W,C]-->[N,C,H,W]
                                                         2])).to(self._device)
         self._im_info = im_info  # No need to change; actually it can be an list
         self._gt_boxes = torch.from_numpy(gt_boxes).to(

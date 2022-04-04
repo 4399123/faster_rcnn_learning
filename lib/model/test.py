@@ -1,3 +1,4 @@
+# coding=gbk
 # --------------------------------------------------------
 # Tensorflow Faster R-CNN
 # Licensed under The MIT License [see LICENSE for details]
@@ -24,6 +25,7 @@ from model.config import cfg, get_output_dir
 from model.bbox_transform import clip_boxes, bbox_transform_inv
 
 import torch
+import cv2
 
 
 def _get_image_blob(im):
@@ -37,6 +39,7 @@ def _get_image_blob(im):
   """
     im_orig = im.astype(np.float32, copy=True)
     im_orig -= cfg.PIXEL_MEANS
+    cv2.imwrite('submean.png',im_orig)
 
     im_shape = im_orig.shape
     im_size_min = np.min(im_shape[0:2])
@@ -94,7 +97,7 @@ def _rescale_boxes(boxes, inds, scales):
 
     return boxes
 
-
+##¼ì²â
 def im_detect(net, im):
     blobs, im_scales = _get_blobs(im)
     assert len(im_scales) == 1, "Only single-image batch implemented"

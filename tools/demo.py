@@ -1,3 +1,4 @@
+# coding=gbk
 #!/usr/bin/env python
 
 # --------------------------------------------------------
@@ -17,19 +18,16 @@ from __future__ import print_function
 # import _init_paths
 from model.config import cfg
 from model.test import im_detect
-
 from torchvision.ops import nms
-
 from utils.timer import Timer
 import matplotlib.pyplot as plt
 import numpy as np
 import os, cv2
 import argparse
 import random
-
 from nets.vgg16 import vgg16
 from nets.resnet_v1 import resnetv1
-
+from nets.mobilenet_v1 import mobilenetv1
 import torch
 
 CLASSES = ('__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
@@ -37,24 +35,12 @@ CLASSES = ('__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
            'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train',
            'tvmonitor')
 
-# NETS = {
-#     'vgg16': ('vgg16_faster_rcnn_iter_%d.pth', ),
-#     'res101': ('res101_faster_rcnn_iter_%d.pth', )
-# }
-# DATASETS = {
-#     'pascal_voc': ('voc_2007_trainval', ),
-#     'pascal_voc_0712': ('voc_2007_trainval+voc_2012_trainval', )
-# }
-
-
 def demo(net):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    # im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    im_file = os.path.join('1.png')
-    im = cv2.imread(im_file)
-
+    im = cv2.imread('004545.jpg')
+    # im=cv2.resize(im,None,None,fx=2,fy=2)
     # Detect all object classes and regress object bounds
     timer = Timer()
     timer.tic()
@@ -82,13 +68,10 @@ def demo(net):
         for i in inds:
             bbox = dets[i, :4]
             score = dets[i, -1]
-            cv2.rectangle(im,(int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[3])),Colors[CLASSES.index(cls)])
-            cv2.putText(im,'{}:{:.2f}'.format(str(cls),score),(int(bbox[0]),int(bbox[1])-5),cv2.FONT_HERSHEY_SIMPLEX,0.4,Colors[CLASSES.index(cls)],1)
+            cv2.rectangle(im,(int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[3])),Colors[CLASSES.index(cls)],2)
+            cv2.putText(im,'{}:{:.2f}'.format(str(cls),score),(int(bbox[0]),int(bbox[1])+12),1,1.2,Colors[CLASSES.index(cls)],2)
     cv2.imshow('11',im)
     cv2.waitKey(0)
-
-
-
 
 def parse_args():
     """Parse input arguments."""
@@ -96,12 +79,11 @@ def parse_args():
         description='Tensorflow Faster R-CNN demo')
     parser.add_argument('--net',
         dest='demo_net',
-        help='Network to use [vgg16 res101]',
+        help='Network to use [vgg16 res101 mobile]',
         default='res101')
     args = parser.parse_args()
 
     return args
-
 
 if __name__ == '__main__':
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
@@ -115,12 +97,14 @@ if __name__ == '__main__':
         net = vgg16()
     elif demonet == 'res101':
         net = resnetv1(num_layers=101)
+    elif demonet == 'mobile':
+        net = mobilenetv1()
     else:
         raise NotImplementedError
     net.create_architecture(21, tag='default', anchor_scales=[8, 16, 32])
 
     net.load_state_dict(
-        torch.load('res101_faster_rcnn_iter_110000.pth'))
+        torch.load('model/res101_faster_rcnn_iter_110000.pth',map_location=torch.device('cpu')))
 
     net.eval()
     if not torch.cuda.is_available():
