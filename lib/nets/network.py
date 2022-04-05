@@ -234,30 +234,30 @@ class Network(nn.Module):
         return loss
 
     def _region_proposal(self, net_conv):
-        rpn = F.relu(self.rpn_net(net_conv))
+        rpn = F.relu(self.rpn_net(net_conv)) #融合周围3x3的空间信息，增强模型鲁棒性
         self._act_summaries['rpn'] = rpn
 
-        rpn_cls_score = self.rpn_cls_score_net(
+        rpn_cls_score = self.rpn_cls_score_net(         #初步分类，1x1卷积后的结果
             rpn)  # batch * (num_anchors * 2) * h * w
 
         # change it so that the score has 2 as its channel size
-        rpn_cls_score_reshape = rpn_cls_score.view(
+        rpn_cls_score_reshape = rpn_cls_score.view(    #卷积后结果reshape
             1, 2, -1,
             rpn_cls_score.size()[-1])  # batch * 2 * (num_anchors*h) * w
-        rpn_cls_prob_reshape = F.softmax(rpn_cls_score_reshape, dim=1)
+        rpn_cls_prob_reshape = F.softmax(rpn_cls_score_reshape, dim=1)#分类卷积结果进行softmax
 
         # Move channel to the last dimenstion, to fit the input of python functions
-        rpn_cls_prob = rpn_cls_prob_reshape.view_as(rpn_cls_score).permute(
+        rpn_cls_prob = rpn_cls_prob_reshape.view_as(rpn_cls_score).permute(  #将softmax后结果的形状恢复回卷积后的形状，同时将通道移动到最后一维
             0, 2, 3, 1)  # batch * h * w * (num_anchors * 2)
-        rpn_cls_score = rpn_cls_score.permute(
+        rpn_cls_score = rpn_cls_score.permute(     #将卷积后的通道移到最后一维
             0, 2, 3, 1)  # batch * h * w * (num_anchors * 2)
-        rpn_cls_score_reshape = rpn_cls_score_reshape.permute(
+        rpn_cls_score_reshape = rpn_cls_score_reshape.permute(  #将卷积后，将通道维度腾出来后的结果，将通道移到最后一维
             0, 2, 3, 1).contiguous()  # batch * (num_anchors*h) * w * 2
-        rpn_cls_pred = torch.max(rpn_cls_score_reshape.view(-1, 2), 1)[1]
+        rpn_cls_pred = torch.max(rpn_cls_score_reshape.view(-1, 2), 1)[1] #获取每个anchor初步分类最大值的索引
 
-        rpn_bbox_pred = self.rpn_bbox_pred_net(rpn)
-        rpn_bbox_pred = rpn_bbox_pred.permute(
-            0, 2, 3, 1).contiguous()  # batch * h * w * (num_anchors*4)
+        rpn_bbox_pred = self.rpn_bbox_pred_net(rpn) #初步回归，1x1卷积后的结果
+        rpn_bbox_pred = rpn_bbox_pred.permute(  #将卷积后的结果，将通道移动到最后一维
+            0, 2, 3, 1).contiguous()  # batch * h * w * (num_anchors*4) #
 
         if self._mode == 'TRAIN':
             rois, roi_scores = self._proposal_layer(
@@ -375,7 +375,7 @@ class Network(nn.Module):
         net_conv = self._image_to_head()    #backbone 特征提取
 
         # build the anchors for the image
-        self._anchor_component(net_conv.size(2), net_conv.size(3))
+        self._anchor_component(net_conv.size(2), net_conv.size(3)) #在原图上建立anchor
 
         rois = self._region_proposal(net_conv)
         if cfg.POOLING_MODE == 'align':

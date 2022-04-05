@@ -1,3 +1,4 @@
+# coding=gbk
 # --------------------------------------------------------
 # Fast R-CNN
 # Copyright (c) 2015 Microsoft
@@ -58,6 +59,11 @@ def bbox_transform_inv(boxes, deltas):
                                 pred_ctr_x + 0.5 * pred_w,\
                                 pred_ctr_y + 0.5 * pred_h]], 2).view(len(boxes), -1)
 
+    # #还可以这么些
+    # pred_boxes = torch.cat([pred_ctr_x - 0.5 * pred_w,\
+    #                         pred_ctr_y - 0.5 * pred_h,\
+    #                         pred_ctr_x + 0.5 * pred_w,\
+    #                         pred_ctr_y + 0.5 * pred_h], 1).view(len(boxes), -1)
     return pred_boxes
 
 

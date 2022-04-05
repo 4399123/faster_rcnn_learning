@@ -1,3 +1,4 @@
+# coding=gbk
 # --------------------------------------------------------
 # Tensorflow Faster R-CNN
 # Licensed under The MIT License [see LICENSE for details]
@@ -25,9 +26,9 @@ def generate_anchors_pre(height,
     shift_x = np.arange(0, width) * feat_stride
     shift_y = np.arange(0, height) * feat_stride
     shift_x, shift_y = np.meshgrid(shift_x, shift_y)
-    shifts = np.vstack((shift_x.ravel(), shift_y.ravel(), shift_x.ravel(),
+    shifts = np.vstack((shift_x.ravel(), shift_y.ravel(), shift_x.ravel(),    #np.ravel()将函数扁平化，跟np.flatten效果一样
                         shift_y.ravel())).transpose()
-    K = shifts.shape[0]
+    K = shifts.shape[0]  #一共需要产生anchor的点数
     # width changes faster, so here it is H, W, C
     anchors = anchors.reshape((1, A, 4)) + shifts.reshape((1, K, 4)).transpose(
         (1, 0, 2))
