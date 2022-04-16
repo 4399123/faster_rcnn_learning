@@ -83,4 +83,15 @@ def clip_boxes(boxes, im_shape):
        boxes[:,:,2].clamp(0, im_shape[1] - 1),
        boxes[:,:,3].clamp(0, im_shape[0] - 1)], 2).view(boxes.size(0), -1)
 
+
+    # 还可以这么写
+    # boxes = torch.stack(\
+    #   [boxes[:,0].clamp(0, im_shape[1] - 1),
+    #    boxes[:,1].clamp(0, im_shape[0] - 1),
+    #    boxes[:,2].clamp(0, im_shape[1] - 1),
+    #    boxes[:,3].clamp(0, im_shape[0] - 1)], 1)
+
+
+
+
     return boxes

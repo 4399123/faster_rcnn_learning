@@ -31,15 +31,15 @@ def proposal_layer(rpn_cls_prob, rpn_bbox_pred, im_info, cfg_key, _feat_stride,
     scores = rpn_cls_prob[:, :, :, num_anchors:]
     rpn_bbox_pred = rpn_bbox_pred.view((-1, 4))
     scores = scores.contiguous().view(-1, 1)
-    proposals = bbox_transform_inv(anchors, rpn_bbox_pred)
-    proposals = clip_boxes(proposals, im_info[:2])
+    proposals = bbox_transform_inv(anchors, rpn_bbox_pred) #基于特征图在原图上生成多个候选框
+    proposals = clip_boxes(proposals, im_info[:2])  #将超出边界部分的候选框进行边界缩放
 
     # Pick the top region proposals
     scores, order = scores.view(-1).sort(descending=True)
     if pre_nms_topN > 0:
         order = order[:pre_nms_topN]
         scores = scores[:pre_nms_topN].view(-1, 1)
-    proposals = proposals[order.data, :]
+    proposals = proposals[order.data, :]      #通过框的索引找出对应的分数
 
     # Non-maximal suppression
     keep = nms(proposals, scores.squeeze(1), nms_thresh)
