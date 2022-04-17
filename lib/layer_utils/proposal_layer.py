@@ -46,12 +46,12 @@ def proposal_layer(rpn_cls_prob, rpn_bbox_pred, im_info, cfg_key, _feat_stride,
 
     # Pick th top region proposals after NMS
     if post_nms_topN > 0:
-        keep = keep[:post_nms_topN]
+        keep = keep[:post_nms_topN]   #取第一次非极大值抑制后的前300个候选框
     proposals = proposals[keep, :]
     scores = scores[keep, ]
 
     # Only support single image as input
     batch_inds = proposals.new_zeros(proposals.size(0), 1)
-    blob = torch.cat((batch_inds, proposals), 1)
+    blob = torch.cat((batch_inds, proposals), 1) #增加维度，为后面的分类做准备
 
     return blob, scores
